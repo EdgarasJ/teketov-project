@@ -1,0 +1,50 @@
+﻿@page "/EditAppointment/{appointmentId:int}"
+@using RegistrationApp.Data
+@inject ApplicationDbContext dbContext
+@inject NavigationManager NavigationManager
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+
+@if (appointment != null)
+{
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h3 class="mb-4 text-center">Edit Visit</h3>
+            <div class="mb-3">
+                <label for="reason" class="form-label">Reason:</label>
+                <textarea id="reason" class="form-control" @bind="appointment.reason" rows="5"></textarea>
+            </div>
+
+            <div class="d-grid mt-3">
+                <button class="btn btn-primary" @onclick="UpdateAppointment">Update</button>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>Visit not found.</p>
+}
+
+@code {
+    [Parameter]
+    public int appointmentId { get; set; }
+
+    private Appointment appointment;
+
+    protected override async Task OnInitializedAsync()
+    {
+        appointment = await dbContext.Appointments.FirstOrDefaultAsync(a => a.id == appointmentId);
+    }
+
+    private async Task UpdateAppointment()
+    {
+        if (appointment != null)
+        {
+            dbContext.Appointments.Update(appointment);
+            await dbContext.SaveChangesAsync();
+            
+            NavigationManager.NavigateTo($"/Appointments/{appointment.patient_id}");
+        }
+    }
+}

@@ -1,0 +1,78 @@
+﻿@page "/user-profile"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using RegistrationApp.Data
+@using System.Security.Claims
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin, Patient, Doctor")]
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+@inject NavigationManager navigationManager
+
+<h3>Profile Info:</h3>
+
+@foreach (dynamic q in querry)
+{
+    <div>
+        <label>Fullname</label>
+        <span>@q.name.ToString()</span>
+    </div>
+    <div>
+        <label>Email</label>
+        <span>@q.email.ToString()</span>
+    </div>
+    <div>
+        <label>Telephone number</label>
+        <span>@q.tel_number.ToString()</span>
+    </div>
+    <div>
+        <label>Address</label>
+        <span>@q.address.ToString()</span>
+    </div>
+    <div>
+        <button class="btn btn-outline-primary" @onclick="EditProfile">Edit Profile</button>
+        <button class="btn btn-outline-primary" @onclick="ChangePassword">Change Password</button>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    List<Profile> profiles;
+    List<User> users;
+
+    uint sid;
+    dynamic querry;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        var u_id = authenticationState.User;
+
+        var psid = u_id.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+
+        sid = Convert.ToUInt32(psid,10);
+
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+            profiles = context.Result.Profiles.ToList();
+            users = context.Result.Users.ToList();
+
+            querry = (from user in users
+                     join profile in profiles on user.id equals profile.user_id
+                     where user.id == sid
+                     select new { email = user.email, name = profile.name, tel_number = profile.tel_number, address = profile.address}).ToList();
+        }
+    }
+
+    private void EditProfile()
+    {
+        navigationManager.NavigateTo("/edit-profile");
+    }
+
+    private void ChangePassword()
+    {
+        navigationManager.NavigateTo("/change-pass");
+    }
+}

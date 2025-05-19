@@ -1,0 +1,62 @@
+﻿@page "/audit"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using RegistrationApp.Data
+@using System.Security.Claims
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+
+
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3>Audit logs</h3>
+        <div class="container-fluid">
+            <div class="d-flex flex-row">
+                <table class="table table-striped table-light">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">User ID</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Time</th>
+                            <th scope="col">Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Auditlog log in logs)
+                        {
+                            string id = log.id.ToString();
+                            string user_id = log.user_id.ToString();
+                            string action = log.Action.ToString();
+                            string time = log.time.ToString();
+                            string info = log.info.ToString();
+                            <tr>
+                                <th scope="row">@id</th>
+                                <td>@user_id</td>
+                                <td>@action</td>
+                                <td>@time</td>
+                                <td>@info</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    public List<Auditlog> logs;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+
+            logs = context.Result.Auditlogs.ToList();
+        }
+    }
+
+}

@@ -1,0 +1,132 @@
+﻿@page "/edit-profile"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using RegistrationApp.Data
+@using RegistrationApp.Data.ViewModels
+@using System.Security.Claims
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin, Patient, Doctor")]
+
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+@inject NavigationManager navigationManager
+
+<h3>Edit profile</h3>
+
+
+<EditForm Model="@Model" FormName="EditProfileForm">
+    <DataAnnotationsValidator />
+    <div class="form-group m-3">
+        <label class="w-25" for="name">Fullname: </label>
+        <InputText class="form-control" id="name" @bind-Value="@Model.fullname"></InputText>
+        <ValidationMessage For="() => Model.fullname" />
+    </div>
+    <div class="form-group m-3">
+        <label class="w-25" for="email">Email:</label>
+        <InputText class="form-control" id="email" @bind-Value="@Model.email"></InputText>
+        <ValidationMessage For="() => Model.email" />
+    </div>
+    <div class="form-group m-3">
+        <label class="w-25" for="tel_number">Telephone Number:</label>
+        <InputText class="form-control" id="tel_number" @bind-Value="@Model.tel_number"></InputText>
+        <ValidationMessage For="() => Model.tel_number" />
+    </div>
+    <div class="form-group m-3">
+        <label class="w-25" for="address">Adress:</label>
+        <InputTextArea class="form-control" id="address" @bind-Value="@Model.address"></InputTextArea>
+        <ValidationMessage For="() => Model.address" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" @onclick="(() => SaveProfile())">Save</button>
+    </div>
+</EditForm>
+<span class="mt-3">@msg</span>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [SupplyParameterFromForm]
+    public ProfileViewModel Model { get; set; } = new ProfileViewModel();
+
+    List<Profile> profiles;
+    List<User> users;
+
+    uint sid;
+    dynamic querry;
+
+    string msg;
+
+    public User newUser = new User();
+    public Profile newProfile = new Profile();
+    public Auditlog newLog = new Auditlog();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        var u_id = authenticationState.User;
+
+        var psid = u_id.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+
+        sid = Convert.ToUInt32(psid,10);
+
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+            profiles = context.Result.Profiles.ToList();
+            users = context.Result.Users.ToList();
+
+            querry = (from user in users
+                      join profile in profiles on user.id equals profile.user_id
+                      where user.id == sid
+                      select new { email = user.email, name = profile.name, tel_number = profile.tel_number, address = profile.address}).ToList();
+
+            Model.fullname = querry[0].name;
+            Model.email = querry[0].email;
+            Model.tel_number = querry[0].tel_number;
+            Model.address = querry[0].address;
+        }
+    }
+
+    private async Task SaveProfile()
+    {
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+
+            newLog.user_id = sid;
+            newLog.time = DateTime.Now;
+            newLog.Action = "Edit";
+            newLog.info = "User changed user profile info.";
+
+
+            try
+            {
+                //context.Result.Users.ExecuteUpdate(newUser);
+
+                context.Result.Users
+                    .Where(u => u.id == sid)
+                    .ExecuteUpdate(setters => setters
+                    .SetProperty(u => u.email, Model.email));
+
+                context.Result.Profiles
+                     .Where(p => p.user_id == sid)
+                     .ExecuteUpdate(setters => setters
+                     .SetProperty(p => p.name, Model.fullname)
+                     .SetProperty(p => p.tel_number, Model.tel_number)
+                     .SetProperty(p => p.address, Model.address)
+                     );
+
+                context.Result.Auditlogs.Add(newLog);
+                await context.Result.SaveChangesAsync();
+
+                msg = "Profile changed.";
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
+        }
+    }
+}

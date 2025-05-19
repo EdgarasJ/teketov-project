@@ -1,0 +1,190 @@
+﻿@page "/doctor-dashboard"
+@using RegistrationApp.Data
+@using RegistrationApp.Services
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<h3>Doctor Dashboard</h3>
+
+<div class="mb-3">
+    <button @onclick="NavigateToAddVisit" class="btn btn-primary">Add New Visit</button>
+</div>
+
+<div class="mb-3">
+    <label for="statusFilter" class="form-label">Filter by Status</label>
+    <select id="statusFilter" class="form-select" @bind="SelectedStatus">
+        <option value="">All</option>
+        <option value="Open">Open</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Cancelled">Cancelled</option>
+    </select>
+</div>
+
+@if (filteredAppointments == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!filteredAppointments.Any())
+{
+    <p>No appointments available.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Reason</th>
+                <th>Time</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var appointment in filteredAppointments)
+            {
+                <tr>
+                    <td>@appointment.Patient.Profile.name</td>
+                    <td>@appointment.reason</td>
+                    <td>@appointment.Timeslot.time.ToString("g")</td>
+                    <td class="text-center">
+                        @if (appointment.status == "Open")
+                        {
+                            <span class="btn btn-info status-button">Open</span>
+                        }
+                        else if (appointment.status == "Confirmed")
+                        {
+                            <span class="btn btn-success status-button">Confirmed</span>
+                        }
+                        else if (appointment.status == "Cancelled")
+                        {
+                            <span class="btn btn-danger status-button">Cancelled</span>
+                        }
+                    </td>
+                    <td class="d-flex justify-content-center">
+                        @if (appointment.status == "Open")
+                        {
+                            <button @onclick="() => ConfirmAppointment(appointment.id)" class="btn btn-success mx-1">Confirm</button>
+                            <button @onclick="() => CancelAppointment(appointment.id)" class="btn btn-danger mx-1">Cancel</button>
+                        }
+                        else if (appointment.status == "Confirmed")
+                        {
+                            <button @onclick="() => CancelAppointment(appointment.id)" class="btn btn-danger mx-1">Cancel</button>
+                        }
+                        else if (appointment.status == "Cancelled")
+                        {
+                            <button @onclick="() => ReopenAppointment(appointment.id)" class="btn btn-warning mx-1">Reopen</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Appointment> appointments;
+    private List<Appointment> filteredAppointments;
+
+    private string selectedStatus = "";
+
+    private string SelectedStatus
+    {
+        get => selectedStatus;
+        set
+        {
+            if (selectedStatus != value)
+            {
+                selectedStatus = value;
+                FilterAppointments();
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAppointments();
+    }
+
+    private async Task LoadAppointments()
+    {
+        try
+        {
+            appointments = await AppointmentService.GetAllAppointmentsForDoctorAsync();
+            FilterAppointments(); 
+            Console.WriteLine($"Loaded {appointments.Count} appointments");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading appointments: {ex.Message}");
+        }
+    }
+
+    private void FilterAppointments()
+    {
+        if (string.IsNullOrEmpty(selectedStatus))
+        {
+            filteredAppointments = appointments;
+        }
+        else
+        {
+            filteredAppointments = appointments.Where(a => a.status == selectedStatus).ToList();
+        }
+    }
+
+    private async Task ConfirmAppointment(uint appointmentId)
+    {
+        try
+        {
+            Console.WriteLine($"Confirming appointment {appointmentId}");
+            await AppointmentService.ConfirmAppointmentAsync(appointmentId);
+            await LoadAppointments();
+            Console.WriteLine($"Appointment {appointmentId} confirmed.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error confirming appointment: {ex.Message}");
+        }
+    }
+
+    private async Task CancelAppointment(uint appointmentId)
+    {
+        try
+        {
+            Console.WriteLine($"Canceling appointment {appointmentId}");
+            await AppointmentService.CancelAppointmentAsync(appointmentId);
+            await LoadAppointments();
+            Console.WriteLine($"Appointment {appointmentId} canceled.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error canceling appointment: {ex.Message}");
+        }
+    }
+
+    private async Task ReopenAppointment(uint appointmentId)
+    {
+        try
+        {
+            Console.WriteLine($"Reopening appointment {appointmentId}");
+            await AppointmentService.ReopenAppointmentAsync(appointmentId);
+            await LoadAppointments();
+            Console.WriteLine($"Appointment {appointmentId} reopened.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reopening appointment: {ex.Message}");
+        }
+    }
+
+    private void NavigateToAddVisit()
+    {
+        Console.WriteLine("Navigating to add-visit");
+        Navigation.NavigateTo("/add-visit");
+    }
+}

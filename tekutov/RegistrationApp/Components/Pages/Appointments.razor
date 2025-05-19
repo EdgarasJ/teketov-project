@@ -1,0 +1,118 @@
+﻿@page "/Appointments/{patientId:int}"
+@using RegistrationApp.Data
+@inject ApplicationDbContext dbContext
+@using Microsoft.EntityFrameworkCore
+@rendermode InteractiveServer
+@using System.Security.Claims;
+
+
+@code {
+    [Parameter]
+    public int patientId { get; set; }
+
+    private List<Appointment> appointments;
+    private List<Doctor> doctors;
+    private List<Profile> profiles;
+    private int appointmentId;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        var user = authenticationState.User;
+        var psid = user.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+        uint sid = Convert.ToUInt32(psid, 10);
+
+        doctors = await dbContext.Doctors.ToListAsync();
+        profiles = await dbContext.Profiles.ToListAsync();
+
+        appointments = await dbContext.Appointments
+            .Include(a => a.Timeslot)
+            .Where(a => a.patient_id == sid)
+            .ToListAsync();
+    }
+
+    private string GetDoctorName(uint doctorId)
+    {
+        var doctor = doctors.FirstOrDefault(d => d.user_id == doctorId);
+        if (doctor != null)
+        {
+            var profile = profiles.FirstOrDefault(p => p.user_id == doctor.user_id);
+            return profile?.name ?? "Unknown";
+        }
+        return "Unknown";
+    }
+
+    private async Task DeleteAppointment(uint appointmentId)
+    {
+        var appointment = await dbContext.Appointments.FirstOrDefaultAsync(a => a.id == appointmentId);
+        if (appointment != null)
+        {
+            var timeslotId = appointment.timeslot_id;
+
+            dbContext.Appointments.Remove(appointment);
+            await dbContext.SaveChangesAsync();
+
+            var timeslot = await dbContext.Timeslots.FindAsync(timeslotId);
+            if (timeslot != null)
+            {
+                timeslot.availability = "Available";
+                dbContext.Timeslots.Update(timeslot);
+                await dbContext.SaveChangesAsync();
+            }
+
+            appointments.Remove(appointment);
+            StateHasChanged();
+        }
+    }
+
+    private string GetReason(uint appointmentId)
+    {
+        var appointment = appointments.FirstOrDefault(a => a.id == appointmentId);
+        return appointment?.reason ?? "Not specified";
+    }
+
+    private string GetStatus(uint appointmentId)
+    {
+        var appointment = appointments.FirstOrDefault(a => a.id == appointmentId);
+        return appointment?.status ?? "Not specified";
+    }
+}
+
+<h3>Patient visits</h3>
+
+@if (appointments != null && appointments.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Data and Time</th>
+                <th>Doctor</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var appointment in appointments)
+            {
+                <tr>
+                    <td>@appointment?.Timeslot?.time.ToString("yyyy-MM-dd") @appointment?.Timeslot?.time.ToString("HH:mm")</td>
+                    <td>@GetDoctorName(appointment.doctor_id)</td>
+                    <td>@GetReason(appointment.id)</td>
+                    <td>@GetStatus(appointment.id)</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteAppointment(appointment.id)">Delete</button>
+                        <a href="@($"EditAppointment/{appointment.id}")" class="btn btn-primary">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No visits found.</p>
+}

@@ -1,0 +1,130 @@
+﻿@implements IDisposable
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims;
+
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">RegistrationApp</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <AuthorizeView Roles="Doctor">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="doctor-dashboard">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Doctor's Dashboard
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="add-visit">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Add New Visit
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="visit-findings-list">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> All Visit Findings
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="visit-findings">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Enter Visit Findings
+                    </NavLink>
+                </div>
+                
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Patient">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="@($"Appointments/{sid}")">
+                        <span class="bi bi-calendar-check-fill-nav-menu" aria-hidden="true"></span> Appointments
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="@($"Doctors/{sid}")">
+                        <span class="bi bi-person-fill" aria-hidden="true"></span> Doctors
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin, Patient, Doctor">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="user-profile">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Profile
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="add-new">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Add New User
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="audit">
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Audit Logs
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        
+    </nav>
+</div>
+
+@code {
+    private string? currentUrl;
+    private uint sid;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var psid = user.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+        sid = Convert.ToUInt32(psid, 10);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+

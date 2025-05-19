@@ -1,0 +1,171 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using RegistrationApp.Data
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeView Roles="Patient">
+    <Authorized>
+        <div>
+            <a href="@($"/Doctors/{sid}")" class="btn btn-primary">Go to Doctors</a>
+            <a href="@($"/Appointments/{sid}")" class="btn btn-primary">Go to Appointments</a>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Please login!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <div class="container-fluid">
+            <div class="d-flex flex-row">
+                <table class="table table-striped table-light">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Telephone number</th>
+                            <th scope="col">Address</th>
+                            <th scope="col">Delete?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (dynamic result in results)
+                        {
+                            string id = result.user_id.ToString();
+                            string name = result.fullname.ToString();
+                            string telno = result.tel.ToString();
+                            string address = result.address.ToString();
+                            string email = result.email.ToString();
+                            string role = result.role.ToString();
+                            <tr>
+                                <th scope="row">@id</th>
+                                <td>@name</td>
+                                <td>@email</td>
+                                <td>@role</td>
+                                <td>@telno</td>
+                                <td>@address</td>
+                                <td><button type="submit" class="btn btn-primary" @onclick="(() => DeleteUser(result.user_id))">Delete</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    dynamic results;
+    private Auditlog newLog = new Auditlog();
+    uint sid;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        var psid = user.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+
+        if (psid != null)
+        {
+            sid = Convert.ToUInt32(psid);
+        }
+
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+
+            results = context.Result.Users.Join(
+                context.Result.Roles,
+                User => User.role_id,
+                Role => Role.id,
+                (User, Role) => new
+                {
+                    user_id = User.id,
+                    email = User.email,
+                    password = User.password,
+                    role = Role.name
+                }
+            ).Join(
+                context.Result.Profiles,
+                res => res.user_id,
+                Profile => Profile.user_id,
+                (res, Profile) => new
+                {
+                    user_id = res.user_id,
+                    email = res.email,
+                    password = res.password,
+                    role = res.role,
+                    tel = Profile.tel_number,
+                    address = Profile.address,
+                    fullname = Profile.name
+                }
+            ).ToList();
+        }
+    }
+
+    private async Task DeleteUser(uint _id)
+    {
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+
+            var authenticationState = await authenticationStateTask;
+            var u_id = authenticationState.User;
+
+            var psid = u_id.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+
+            sid = Convert.ToUInt32(psid, 10);
+
+            string info = String.Format("Admin deleted user with ID {0}.", _id.ToString());
+
+            newLog.user_id = sid;
+            newLog.time = DateTime.Now;
+            newLog.Action = "Delete";
+            newLog.info = info;
+
+            context.Result.Auditlogs.Add(newLog);
+
+
+            List<User> users = context.Result.Users.Where(u => u.id == _id).ToList();
+            List<Profile> profiles = context.Result.Profiles.Where(p => p.user_id == _id).ToList();
+            List<Doctor> doctors = context.Result.Doctors.Where(d => d.user_id == _id).ToList();
+            List<Patient> patients = context.Result.Patients.Where(p => p.user_id == _id).ToList();
+
+            foreach(User u in users)
+            {
+                context.Result.Users.Remove(u);
+            }
+            foreach (Profile p in profiles)
+            {
+                context.Result.Profiles.Remove(p);
+            }
+            foreach (Doctor d in doctors)
+            {
+                context.Result.Doctors.Remove(d);
+            }
+            foreach (Patient p in patients)
+            {
+                context.Result.Patients.Remove(p);
+            }
+
+            await context.Result.SaveChangesAsync();
+            navigationManager.NavigateTo(navigationManager.Uri, true);
+        }
+    }
+}

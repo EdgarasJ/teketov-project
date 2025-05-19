@@ -1,0 +1,121 @@
+﻿@page "/Timeslots/{doctorId:int}/{sid:int}"
+@using RegistrationApp.Data
+@inject ApplicationDbContext dbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore;
+@using System.Security.Claims;
+
+@code {
+    [Parameter]
+    public int doctorId { get; set; }
+
+    [Parameter]
+    public int sid { get; set; }
+
+    private Doctor doctor;
+    private Profile profile;
+    private List<Timeslot> timeslots;
+    private string selectedTime;
+    private string reason;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authenticationState.User;
+        sid = int.Parse(user.FindFirstValue("http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"));
+
+        doctor = dbContext.Doctors.FirstOrDefault(d => d.user_id == doctorId);
+        if (doctor != null)
+        {
+            profile = dbContext.Profiles.FirstOrDefault(p => p.user_id == doctor.user_id);
+            if (profile != null)
+            {
+                timeslots = dbContext.Timeslots
+                    .Where(t => t.doctor_id == doctor.user_id && t.availability == "Available")
+                    .ToList();
+            }
+        }
+    }
+
+    private async Task BookAppointment()
+    {
+        if (!string.IsNullOrEmpty(selectedTime) && !string.IsNullOrEmpty(reason))
+        {
+            var selectedTimeslot = timeslots.FirstOrDefault(t => t.time.ToShortDateString() == selectedTime);
+            if (selectedTimeslot != null)
+            {
+                var isTimeSlotAvailable = await IsTimeSlotAvailable(selectedTimeslot.id);
+                if (isTimeSlotAvailable)
+                {
+                    var appointment = new Appointment
+                        {
+                            doctor_id = selectedTimeslot.doctor_id,
+                            timeslot_id = selectedTimeslot.id,
+                            patient_id = Convert.ToUInt32(sid),
+                            reason = reason,
+                            status = "Open"
+                        };
+                    dbContext.Appointments.Add(appointment);
+                    await dbContext.SaveChangesAsync();
+
+                    selectedTimeslot.availability = "Reserved";
+                    dbContext.Timeslots.Update(selectedTimeslot);
+                    await dbContext.SaveChangesAsync();
+
+                    timeslots.Remove(selectedTimeslot);
+
+                    // Redirect to Appointments page after booking
+                    NavigationManager.NavigateTo($"/Appointments/{sid}");
+                }
+                else
+                {
+                    Console.WriteLine("This timeslot has already been booked. Please select another one.");
+                }
+            }
+        }
+    }
+
+    private async Task<bool> IsTimeSlotAvailable(uint timeslotId)
+    {
+        var existingAppointment = await dbContext.Appointments.FirstOrDefaultAsync(a => a.timeslot_id == timeslotId);
+        return existingAppointment == null;
+    }
+}
+
+@if (doctor != null && profile != null)
+{
+    <div class="container mt-5">
+        <h1>@profile.name</h1>
+
+        <h2>Available Timeslots:</h2>
+        @if (timeslots != null && timeslots.Any())
+        {
+            <ul class="list-group">
+                @foreach (var timeslot in timeslots)
+                {
+                    <li class="list-group-item">
+                        <input type="radio" id="@timeslot.time.ToShortDateString()" name="selectedTime" value="@timeslot.time.ToShortDateString()" @onchange="() => selectedTime = timeslot.time.ToShortDateString()" />
+                        <label for="@timeslot.time.ToShortDateString()"> @timeslot.time.ToShortDateString() @timeslot.time.ToShortTimeString()</label>
+                    </li>
+                }
+            </ul>
+            <div class="form-group mt-3">
+                <label for="reason">Reason:</label>
+                <input type="text" id="reason" class="form-control" @bind="reason" />
+            </div>
+            <button class="btn btn-primary mt-3" @onclick="BookAppointment">Book Appointment</button>
+        }
+        else
+        {
+            <p>No available timeslots.</p>
+        }
+    </div>
+}
+else
+{
+    <div class="container mt-5">
+        <p>Doctor not found.</p>
+    </div>
+}

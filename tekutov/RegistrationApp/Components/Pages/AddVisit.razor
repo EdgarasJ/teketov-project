@@ -1,0 +1,105 @@
+﻿@page "/add-visit"
+@using RegistrationApp.Data
+@using RegistrationApp.Services
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
+
+<h3>Add New Visit</h3>
+
+<EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="patientId" class="form-label">Patient</label>
+        <select id="patientId" class="form-select" @onchange="@(async (e) => await LoadAvailableTimeslots(e))">
+            @foreach (var patient in patients)
+            {
+                <option value="@patient.user_id">@patient.Profile.name</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="timeslotId" class="form-label">Timeslot</label>
+        <select id="timeslotId" class="form-select" @bind="timeslotId">
+            @foreach (var timeslot in availableTimeslots)
+            {
+                <option value="@timeslot.id">@timeslot.time.ToString("g")</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="reason" class="form-label">Reason</label>
+        <InputText id="reason" class="form-control" @bind-Value="newAppointment.reason" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@code {
+    private Appointment newAppointment = new Appointment();
+    private List<Timeslot> availableTimeslots = new List<Timeslot>();
+    private List<Patient> patients = new List<Patient>();
+
+    private int timeslotId;
+    private uint selectedPatientId;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        patients = await AppointmentService.GetPatientsAsync();
+    }
+
+    private async Task LoadAvailableTimeslots(ChangeEventArgs e)
+    {
+        selectedPatientId = Convert.ToUInt32(e.Value);
+        var doctorId = await GetLoggedInDoctorIdAsync();
+        if (doctorId.HasValue && selectedPatientId > 0)
+        {
+            availableTimeslots = await AppointmentService.GetAvailableTimeslotsForDoctorAndPatientAsync(doctorId.Value, selectedPatientId);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            newAppointment.patient_id = selectedPatientId;
+            newAppointment.timeslot_id = (uint)timeslotId;
+            newAppointment.status = "Open";
+
+            await AppointmentService.CreateAppointmentForLoggedInDoctorAsync(newAppointment);
+            Navigation.NavigateTo("/doctor-dashboard");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating appointment: {ex.Message}");
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task<uint?> GetLoggedInDoctorIdAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var doctorId = user.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+            return uint.TryParse(doctorId, out var id) ? id : null;
+        }
+
+        return null;
+    }
+}

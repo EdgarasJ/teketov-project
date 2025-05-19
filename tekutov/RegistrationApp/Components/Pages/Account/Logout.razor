@@ -1,0 +1,66 @@
+﻿@page "/logout"
+
+@using Microsoft.AspNetCore.Authentication;
+@using RegistrationApp.Data
+
+
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+
+@inject NavigationManager navigationManager
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body flex-column">
+                <div class="text-center">
+                    <img src="/images/logout.jpg" alt="Access-Denied" style="max-height:5rem;" />
+                </div>
+                <div class="text-center mt-2">
+                    <span class="text-danger fw-bolder">You successfully logged out.'</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    public Auditlog newLog = new Auditlog();
+
+    uint sid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (HttpContext.User.Identity.IsAuthenticated)
+        {
+            using (var context = AppDbContextFactory.CreateDbContextAsync())
+            {
+                var authenticationState = await authenticationStateTask;
+                var u_id = authenticationState.User;
+
+                var psid = u_id.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+
+                sid = Convert.ToUInt32(psid, 10);
+                
+                newLog.user_id = sid;
+                newLog.time = DateTime.Now;
+                newLog.Action = "Logout";
+                newLog.info = "User logged out.";
+
+                context.Result.Auditlogs.Add(newLog);
+                await context.Result.SaveChangesAsync();
+            }
+            
+            await HttpContext.SignOutAsync();
+            navigationManager.NavigateTo("/logout", true);
+        }
+    }
+}

@@ -1,0 +1,78 @@
+﻿@page "/add-new"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using RegistrationApp.Data
+@using RegistrationApp.Data.ViewModels
+@using System.Security.Claims
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+@inject NavigationManager navigationManager
+
+<h3>Choose user type to add</h3>
+
+<EditForm Model="@Model" FormName="AddNewForm">
+    <DataAnnotationsValidator />
+    <div class="form-group m-3">
+        <label for="role-id">Choose Role:</label>
+        <InputSelect class="form-select" id="role-id" @bind-Value="Model.role_id">    
+            @foreach (Role role in roles)
+            {
+                <option selected value="@role.id">@role.name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Model.role_id" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" @onclick="(() => Select())">Select</button>
+    </div>
+</EditForm>
+
+@inject Data.ApplicationDbContext dbContext;
+@code {
+
+    [SupplyParameterFromForm]
+    public NewUserViewModel Model { get; set; } = new NewUserViewModel();
+
+    List<Role> roles;
+
+    public enum rolesEnum : uint
+    {
+        admin = 1,
+        doctor = 2,
+        patient = 3
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+            roles = context.Result.Roles.ToList();
+        }
+    }
+
+    private async Task Select()
+    {
+
+    
+
+        if(Model.role_id == (uint)rolesEnum.admin)
+        {
+            navigationManager.NavigateTo("/add-admin");
+        }
+        if (Model.role_id == (uint)rolesEnum.doctor)
+        {
+            navigationManager.NavigateTo("/add-doctor");
+        }
+        if (Model.role_id == (uint)rolesEnum.patient)
+        {
+            navigationManager.NavigateTo("/add-patient");
+        }
+    }
+}

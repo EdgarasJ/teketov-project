@@ -1,0 +1,58 @@
+﻿@page "/Doctors/{sid:int}"
+@using RegistrationApp.Data
+@inject ApplicationDbContext dbContext
+@using Microsoft.EntityFrameworkCore
+
+@code {
+    [Parameter]
+    public int sid { get; set; }
+
+    private List<Doctor> doctors;
+    private List<Profile> profiles;
+    private List<Category> categories;
+    private Dictionary<string, List<Doctor>> doctorsByCategory = new Dictionary<string, List<Doctor>>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        doctors = await dbContext.Doctors.ToListAsync();
+        profiles = await dbContext.Profiles.ToListAsync();
+        categories = await dbContext.Categories.ToListAsync();
+
+        foreach (var category in new[] { "Cardiologist", "Oncologist", "Physician", "Surgeon" })
+        {
+            doctorsByCategory[category] = GetDoctorsByCategory(category);
+        }
+    }
+
+    private List<Doctor> GetDoctorsByCategory(string categoryName)
+    {
+        return doctors.Where(d =>
+            categories.FirstOrDefault(c => c.id == d.category_id)?.name == categoryName).ToList();
+    }
+}
+
+@foreach (var category in new[] { "Cardiologist", "Oncologist", "Physician", "Surgeon" })
+{
+    <h1>@category</h1>
+    <ul class="list-group">
+        @if (doctorsByCategory.ContainsKey(category))
+        {
+            foreach (var doctor in doctorsByCategory[category])
+            {
+                var profile = profiles.FirstOrDefault(p => p.user_id == doctor.user_id);
+                if (profile != null)
+                {
+                    <li class="list-group-item">
+                        <a class="btn btn-primary" href="@($"Timeslots/{doctor.user_id}/{sid}")">@profile.name</a>
+                    </li>
+                }
+            }
+        }
+        else
+        {
+            <li class="list-group-item">No doctors found in this category.</li>
+        }
+    </ul>
+}
+
+

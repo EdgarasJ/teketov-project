@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RegistrationApp", "RegistrationApp\RegistrationApp.csproj", "{B31FCEDE-F199-4CE6-B3F3-D4A68A857FD1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B31FCEDE-F199-4CE6-B3F3-D4A68A857FD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B31FCEDE-F199-4CE6-B3F3-D4A68A857FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B31FCEDE-F199-4CE6-B3F3-D4A68A857FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B31FCEDE-F199-4CE6-B3F3-D4A68A857FD1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9705CB41-D4B5-494A-B1F4-29EE2DA1108C}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://dev.azure.com/ku-jnii22-2
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = RegistrationApp\\RegistrationApp.csproj
+		SccProjectName1 = RegistrationApp
+		SccLocalPath1 = RegistrationApp
+	EndGlobalSection
+EndGlobal

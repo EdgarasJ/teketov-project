@@ -1,0 +1,131 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = RegistrationApp
+build_property.RootNamespace = RegistrationApp
+build_property.ProjectDir = C:\Users\Edis\Downloads\tekutov\RegistrationApp\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Edis\Downloads\tekutov\RegistrationApp
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/App.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBcHAucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Account/AccessDenied.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50XEFjY2Vzc0RlbmllZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Account/Change-password.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50XENoYW5nZS1wYXNzd29yZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Account/Edit-profile.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50XEVkaXQtcHJvZmlsZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Account/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50XExvZ2luLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Account/Logout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50XExvZ291dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Account/User-profile.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBY2NvdW50XFVzZXItcHJvZmlsZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/AddAdmin.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZGRBZG1pbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/AddDoctor.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZGREb2N0b3IucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/AddNew.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZGROZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/AddPatient.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZGRQYXRpZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/AddVisit.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBZGRWaXNpdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Appointments.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBcHBvaW50bWVudHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Audit.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBdWRpdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Auth.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xBdXRoLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/DoctorDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xEb2N0b3JEYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Doctors.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xEb2N0b3JzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/EditAppointment.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFZGl0QXBwb2ludG1lbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/EnterVisitFindings.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFbnRlclZpc2l0RmluZGluZ3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Error.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFcnJvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/Timeslots.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUaW1lc2xvdHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/VisitFindings.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xWaXNpdEZpbmRpbmdzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Pages/VisitFindingsList.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xWaXNpdEZpbmRpbmdzTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSb3V0ZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xfSW1wb3J0cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbkxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-n82kadbqrd
+
+[C:/Users/Edis/Downloads/tekutov/RegistrationApp/Components/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2TWVudS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-80oycqj8rt

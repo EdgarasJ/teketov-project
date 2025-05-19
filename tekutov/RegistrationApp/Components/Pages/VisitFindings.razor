@@ -1,0 +1,58 @@
+﻿@page "/visit-findings"
+@using RegistrationApp.Data
+@using RegistrationApp.Services
+@using Microsoft.EntityFrameworkCore
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h3>Confirmed Appointments</h3>
+
+@if (confirmedAppointments == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (confirmedAppointments.Count == 0)
+{
+    <p>No confirmed appointments available.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Appointment Time</th>
+                <th>Reason</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var appointment in confirmedAppointments)
+            {
+                <tr>
+                    <td>@appointment.Patient.Profile.name</td>
+                    <td>@appointment.Timeslot.time.ToString("g")</td>
+                    <td>@appointment.reason</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => NavigateToEnterFindings(appointment.id)">Add / Change Findings</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Appointment> confirmedAppointments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        confirmedAppointments = await AppointmentService.GetConfirmedAppointmentsForDoctorAsync();
+    }
+
+    private void NavigateToEnterFindings(uint appointmentId)
+    {
+        Navigation.NavigateTo($"/enter-visit-findings/{appointmentId}");
+    }
+}

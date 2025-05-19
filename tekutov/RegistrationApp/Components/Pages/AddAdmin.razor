@@ -1,0 +1,133 @@
+﻿@page "/add-admin"
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
+@using RegistrationApp.Data
+@using RegistrationApp.Data.ViewModels
+@using System.Security.Claims
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+@inject NavigationManager navigationManager
+
+<h3>Add New administrator</h3>
+
+<EditForm Model="@Model" FormName="AddNewForm">
+    <DataAnnotationsValidator />
+    <div class="form-group m-3">
+        <label for="name">Fullname: </label>
+        <InputText class="form-control" id="name" @bind-Value="@Model.fullname"></InputText>
+        <ValidationMessage For="() => Model.fullname" />
+    </div>
+    <div class="form-group m-3">
+        <label for="password">Password:</label>
+        <InputText class="form-control" type="password" id="password" @bind-Value="@Model.password"></InputText>
+        <ValidationMessage For="() => Model.password" />
+    </div>
+    <div class="form-group m-3">
+        <label for="email">Email:</label>
+        <InputText class="form-control" id="email" @bind-Value="@Model.email"></InputText>
+        <ValidationMessage For="() => Model.email" />
+    </div>
+    <div class="form-group m-3">
+        <label for="tel_number">Telephone Number:</label>
+        <InputText class="form-control" id="tel_number" @bind-Value="@Model.tel_number"></InputText>
+        <ValidationMessage For="() => Model.tel_number" />
+    </div>
+    <div class="form-group m-3">
+        <label for="address">Adress:</label>
+        <InputTextArea class="form-control" id="address" @bind-Value="@Model.address"></InputTextArea>
+        <ValidationMessage For="() => Model.address" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" @onclick="(() => AddUser())">Add</button>
+    </div>
+</EditForm>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [SupplyParameterFromForm]
+    public NewUserViewModel Model { get; set; } = new NewUserViewModel();
+
+    List<Role> roles;
+
+    public User newUser = new User();
+    public Profile newProfile = new Profile();
+    public Auditlog newLog = new Auditlog();
+
+    uint sid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+            roles = context.Result.Roles.ToList();
+        }
+    }
+
+    private async Task AddUser()
+    {
+
+        var role_ids = roles.Where(role => role.name == "Admin").Select(role => role.id).ToList();
+
+        newUser.email = Model.email;
+        newUser.password = Model.password;
+        newUser.role_id = role_ids[0];
+
+        newProfile.name = Model.fullname;
+        newProfile.address = Model.address;
+        newProfile.tel_number = Model.tel_number;
+
+
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+
+
+            var authenticationState = await authenticationStateTask;
+            var u_id = authenticationState.User;
+
+            var psid = u_id.FindFirst(c => c.Type == ClaimTypes.PrimarySid)?.Value;
+
+            sid = Convert.ToUInt32(psid, 10);
+
+
+            try
+            {
+
+
+               
+                context.Result.Users.Add(newUser);
+                await context.Result.SaveChangesAsync();
+
+                var user_id = context.Result.Users.Where(user => user.email == newUser.email).Select(user => user.id).ToList();
+
+                string info = String.Format("Admin created new Admin with ID {0}.", user_id[0].ToString());
+
+                newLog.user_id = sid;
+                newLog.time = DateTime.Now;
+                newLog.Action = "Created";
+                newLog.info = info;
+
+                newProfile.user_id = user_id[0];
+                context.Result.Profiles.Add(newProfile);
+                context.Result.Auditlogs.Add(newLog);
+                await context.Result.SaveChangesAsync();
+                navigationManager.NavigateTo("/");
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+
+
+    }
+}

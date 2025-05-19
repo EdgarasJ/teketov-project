@@ -1,0 +1,54 @@
+﻿@page "/visit-findings-list"
+@using RegistrationApp.Data
+@using RegistrationApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AppointmentService AppointmentService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<h3>All Visit Findings</h3>
+
+@if (visitFindings == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (visitFindings.Count == 0)
+{
+    <p>No visit findings available.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Appointment Time</th>
+                <th>Findings</th>
+                <th>Prescription</th>
+                <th>Follow-Up</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var finding in visitFindings)
+            {
+                <tr>
+                    <td>@finding.Appointment.Patient.Profile.name</td>
+                    <td>@finding.Appointment.Timeslot.time.ToString("g")</td>
+                    <td>@finding.findings</td>
+                    <td>@finding.prescription</td>
+                    <td>@finding.fallowup</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Visitfinding> visitFindings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        visitFindings = await AppointmentService.GetAllVisitFindingsForDoctorAsync();
+    }
+}

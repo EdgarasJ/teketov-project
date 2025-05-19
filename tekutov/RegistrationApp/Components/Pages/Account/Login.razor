@@ -1,0 +1,95 @@
+﻿@page "/login"
+
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.EntityFrameworkCore
+@using RegistrationApp.Data.ViewModels
+@using RegistrationApp.Data
+@using System.Security.Claims
+
+@inject IDbContextFactory<ApplicationDbContext> AppDbContextFactory
+@inject NavigationManager navigationManager
+
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <EditForm Model="@Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+            <DataAnnotationsValidator />
+            <div class="mb-3 text-center flex-column">
+                <img src="/images/avatar.jpg" alt="Avatar" style="max-height:5rem;" />
+                <h3>LOGIN</h3>
+            </div>
+            <div class="mb-3">
+                <label>Email:</label>
+                <InputText @bind-Value="Model.email" class="form-control" placeholder="Email"></InputText>
+                <ValidationMessage For="() => Model.email" />
+            </div>
+            <div class="mb-3">
+                <label>Password:</label>
+                <InputText @bind-Value="Model.password" class="form-control" type="password" placeholder="Password"></InputText>
+                <ValidationMessage For="() => Model.password" />
+            </div>
+            <div class="mb-3 text-center">
+                <span class="text-danger">@errorMessage</span>
+            </div>
+            <div class="mb-3 d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    public LoginViewModel Model { get; set; } = new LoginViewModel();
+
+    private string? errorMessage;
+    public Auditlog newLog = new Auditlog();
+
+    private async Task Authenticate()
+    {
+        using (var context = AppDbContextFactory.CreateDbContextAsync())
+        {
+            var userAccount = context.Result.Users.Join(
+                context.Result.Roles, 
+                User => User.role_id, 
+                Role => Role.id,
+                (User, Role) => new
+                {
+                    user_id = User.id,
+                    email = User.email,
+                    password = User.password,
+                    role = Role.name
+                }
+            ).Where(x => x.email == Model.email).FirstOrDefault();
+            if(userAccount is null || userAccount.password != Model.password)
+            {
+                errorMessage = "Error: Invalid Email or Password";
+                return;
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.PrimarySid, userAccount.user_id.ToString()),
+                new Claim(ClaimTypes.Email, Model.email),
+                new Claim(ClaimTypes.Role, userAccount.role)
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(principal);
+
+            newLog.user_id = userAccount.user_id;
+            newLog.time = DateTime.Now;
+            newLog.Action = "Login";
+            newLog.info = "User logged in.";
+
+            context.Result.Auditlogs.Add(newLog);
+            await context.Result.SaveChangesAsync();
+
+            navigationManager.NavigateTo("/");
+        }
+    }
+}

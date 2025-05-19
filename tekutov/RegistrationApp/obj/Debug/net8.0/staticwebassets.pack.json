@@ -1,0 +1,57 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\RegistrationApp.bundle.scp.css",
+      "PackagePath": "staticwebassets\\RegistrationApp.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\images\\access-denied.jpg",
+      "PackagePath": "staticwebassets\\images\\access-denied.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\images\\avatar.jpg",
+      "PackagePath": "staticwebassets\\images\\avatar.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\images\\cat.jpeg",
+      "PackagePath": "staticwebassets\\images\\cat.jpeg"
+    },
+    {
+      "Id": "C:\\Users\\Edis\\Downloads\\tekutov\\RegistrationApp\\wwwroot\\images\\logout.jpg",
+      "PackagePath": "staticwebassets\\images\\logout.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.RegistrationApp.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.RegistrationApp.props",
+      "PackagePath": "build\\RegistrationApp.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.RegistrationApp.props",
+      "PackagePath": "buildMultiTargeting\\RegistrationApp.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.RegistrationApp.props",
+      "PackagePath": "buildTransitive\\RegistrationApp.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
